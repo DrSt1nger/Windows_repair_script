@@ -2,43 +2,43 @@
 :: ==============================================================================
 :: Created by DrSt1nger - https://github.com/DrSt1nger/Windows_repair_script
 :: ==============================================================================
-:: COMPREHENSIVE WINDOWS MAINTENANCE, REPAIR AND CLEANUP SCRIPT
+:: COMPREHENSIVE WINDOWS MAINTENANCE, REPAIR AND CLEANUP SCRIPT (Optimized Edition)
 :: Requires Administrator Privileges
 :: ==============================================================================
 
-title Windows System Repair and Deep Cleanup
+title Windows System Repair and Deep Cleanup (Optimized)
+color 0A
 
-:: 1. Check for Administrator Privileges
+:: Create log file
+set LOG=%SystemRoot%\Logs\RepairScript_Optimized.log
+echo ==== PROCESS STARTED (%DATE% %TIME%) ==== >> "%LOG%"
+
+:: 1. Administrator Privilege Check
 net session >nul 2>&1
-if %errorLevel% neq 0 (
+if %errorlevel% neq 0 (
     echo.
     echo ==============================================================================
     echo [ERROR] This script MUST be executed as Administrator.
     echo.
-    echo Right-click on the .bat file and select "Run as administrator".
+    echo Right-click the .bat file and select "Run as administrator".
     echo ==============================================================================
     echo.
     pause
     exit /b
 )
 
-color 0A
 cls
 echo ==============================================================================
 echo                STARTING SYSTEM MAINTENANCE AND REPAIR
 echo ==============================================================================
-echo.
-echo Created by DrSt1nger - https://github.com/DrSt1nger/Windows_repair_script
-echo.
-echo This process will perform the following tasks:
-echo   1. System image verification and repair (DISM)
-echo   2. Protected system file scan and repair (SFC)
-echo   3. Component store cleanup and optimization (WinSxS)
-echo   4. Disk file system integrity check (CHKDSK)
-echo   5. Cleanup of temporary files and Windows Update cache
-echo   6. Network stack reset and DNS cache flush
-echo.
-echo NOTE: The process may take between 10 to 25 minutes depending on your system.
+echo This process will perform:
+echo   - Windows image repair (DISM)
+echo   - System file integrity check (SFC)
+echo   - Component store cleanup (WinSxS)
+echo   - Disk integrity scan (CHKDSK)
+echo   - Temporary files cleanup
+echo   - Windows Update cache cleanup
+echo   - Network reset and DNS flush
 echo.
 pause
 
@@ -47,20 +47,12 @@ pause
 :: ------------------------------------------------------------------------------
 echo.
 echo ==============================================================================
-echo [PHASE 1/6] Analyzing and repairing Windows image (DISM)...
+echo [PHASE 1/6] Repairing Windows image (DISM)...
 echo ==============================================================================
 echo.
 
-echo -- [1/3] Checking image health...
-dism /Online /Cleanup-Image /CheckHealth
-
-echo.
-echo -- [2/3] Scanning image state...
-dism /Online /Cleanup-Image /ScanHealth
-
-echo.
-echo -- [3/3] Restoring system image via Windows Update...
-dism /Online /Cleanup-Image /RestoreHealth
+dism /Online /Cleanup-Image /RestoreHealth >> "%LOG%"
+echo DISM completed.
 
 :: ------------------------------------------------------------------------------
 :: PHASE 2: SFC (System File Checker)
@@ -70,17 +62,21 @@ echo ===========================================================================
 echo [PHASE 2/6] Scanning and repairing protected system files (SFC)...
 echo ==============================================================================
 echo.
-sfc /scannow
+
+sfc /scannow >> "%LOG%"
+echo SFC completed.
 
 :: ------------------------------------------------------------------------------
 :: PHASE 3: WinSxS Component Store Cleanup
 :: ------------------------------------------------------------------------------
 echo.
 echo ==============================================================================
-echo [PHASE 3/6] Optimizing and cleaning up component store (WinSxS)...
+echo [PHASE 3/6] Cleaning and optimizing component store (WinSxS)...
 echo ==============================================================================
 echo.
-dism /Online /Cleanup-Image /StartComponentCleanup /ResetBase
+
+dism /Online /Cleanup-Image /StartComponentCleanup >> "%LOG%"
+echo Component store cleanup completed.
 
 :: ------------------------------------------------------------------------------
 :: PHASE 4: Disk Integrity Check
@@ -90,7 +86,9 @@ echo ===========================================================================
 echo [PHASE 4/6] Checking drive C: integrity...
 echo ==============================================================================
 echo.
-chkdsk C: /scan
+
+chkdsk C: /scan >> "%LOG%"
+echo Disk scan completed.
 
 :: ------------------------------------------------------------------------------
 :: PHASE 5: Temp Files & Windows Update Cache Cleanup
@@ -101,44 +99,49 @@ echo [PHASE 5/6] Cleaning temporary files and Windows Update cache...
 echo ==============================================================================
 echo.
 
-echo -- Stopping Windows Update services...
-net stop wuauserv >nul 2>&1
-net stop bits >nul 2>&1
-
-echo -- Removing old or corrupted update downloads...
-if exist "C:\Windows\SoftwareDistribution\Download" (
-    del /f /q /s "C:\Windows\SoftwareDistribution\Download\*.*" >nul 2>&1
+echo -- Stopping Windows Update related services...
+for %%S in (wuauserv bits cryptsvc) do (
+    net stop %%S >nul 2>&1
 )
 
-echo -- Restarting Windows Update services...
-net start wuauserv >nul 2>&1
-net start bits >nul 2>&1
+echo -- Removing Windows Update cache...
+rd /s /q "%SystemRoot%\SoftwareDistribution\Download" 2>nul
 
-echo -- Cleaning System and User Temp folders...
-del /f /q /s "%TEMP%\*.*" >nul 2>&1
-del /f /q /s "C:\Windows\Temp\*.*" >nul 2>&1
+echo -- Restarting services...
+for %%S in (wuauserv bits cryptsvc) do (
+    net start %%S >nul 2>&1
+)
 
-echo -- Cleaning Prefetch files...
-del /f /q /s "C:\Windows\Prefetch\*.*" >nul 2>&1
+echo -- Cleaning temporary folders...
+del /f /q /s "%TEMP%\*.*" 2>nul
+del /f /q /s "%SystemRoot%\Temp\*.*" 2>nul
+
+echo Temporary cleanup completed.
 
 :: ------------------------------------------------------------------------------
 :: PHASE 6: Network & DNS Reset
 :: ------------------------------------------------------------------------------
 echo.
 echo ==============================================================================
-echo [PHASE 6/6] Flushing DNS cache and resetting network sockets...
+echo [PHASE 6/6] Resetting network components and flushing DNS...
 echo ==============================================================================
 echo.
-ipconfig /flushdns
-netsh winsock reset >nul 2>&1
-netsh int ip reset >nul 2>&1
+
+ipconfig /flushdns >> "%LOG%"
+netsh winsock reset >> "%LOG%"
+netsh int ip reset >> "%LOG%"
+echo Network reset completed.
+
+echo ==== PROCESS FINISHED (%DATE% %TIME%) ==== >> "%LOG%"
 
 echo.
 echo ==============================================================================
 echo                       MAINTENANCE COMPLETED!
 echo ==============================================================================
-echo.
 echo All repair and cleanup tasks have been executed successfully.
 echo A system reboot is recommended to apply all changes.
+echo.
+echo Log file saved at:
+echo   %LOG%
 echo.
 pause
