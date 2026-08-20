@@ -1,6 +1,15 @@
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-yellow.svg?style=for-the-badge&logo=buy-me-a-coffee)](https://buymeacoffee.com/drowfear)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-ff5e5b.svg?style=for-the-badge&logo=ko-fi)](https://ko-fi.com/drowfear)
+
 🛠️ Windows Repair & Deep Cleanup Script
 A lightweight, automated Batch script designed to repair, optimize, and clean up Windows operating systems. By combining Microsoft’s recommended diagnostic tools into a single execution sequence, this script restores system stability and frees up valuable disk space without needing third-party software.
 
+## ☕ Support the Project
+
+If this script saved you time and clicks, consider supporting my work!
+
+👉 **[buymeacoffee.com/drowfear](https://buymeacoffee.com/drowfear)**
+👉 **[ko-fi.com/drowfear](https://ko-fi.com/drowfear)**
 ✨ Key Features
 DISM Image Repair: Scans, verifies, and restores corrupted Windows system image files directly via Windows Update.
 
