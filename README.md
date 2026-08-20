@@ -10,6 +10,7 @@ If this script saved you time and clicks, consider supporting my work!
 
 👉 **[buymeacoffee.com/drowfear](https://buymeacoffee.com/drowfear)**
 👉 **[ko-fi.com/drowfear](https://ko-fi.com/drowfear)**
+
 ✨ Key Features
 DISM Image Repair: Scans, verifies, and restores corrupted Windows system image files directly via Windows Update.
 
